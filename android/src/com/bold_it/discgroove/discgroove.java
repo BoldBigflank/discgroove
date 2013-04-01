@@ -81,6 +81,22 @@ public class discgroove extends Cocos2dxActivity{
                 
                 // Push the yaw into the game's rotation variable.
                 Log.d("activity", "Data " + (float)ballData.getAttitudeData().getAttitudeSensor().yaw);
+                // TODO: Move the wheel to match the yaw, like this iOS version 
+//                HelloWorld *gameLayer = ( HelloWorld* ) cocos2d::CCDirector::sharedDirector()->getRunningScene()->getChildByTag(443);
+//                cocos2d::CCSprite *center = ( cocos2d::CCSprite* ) gameLayer->getChildByTag(543);
+//                
+//                CCLOG("Yaw: %f", attitudeData.yaw);
+//                if(center){
+//                    CCLOG("%d", center->getTag());
+//                    center->setRotation(-1 * attitudeData.yaw);
+//                    cocos2d::CCObject *dot;
+//                    
+//                    CCARRAY_FOREACH(gameLayer->_dotDudes, dot){
+//                        DotDude *dotDude = static_cast<DotDude*>(dot);
+//                        dotDude->setRotation( -1 * center->getRotation());
+//                    }
+//                }
+                
                 
                 //mGLSurfaceView.onSensorChanged(sensorData);
             }
