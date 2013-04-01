@@ -1,0 +1,3 @@
+# view AndroidManifest.xml #generated:13
+-keep class com.bold_it.discgroove.discgroove { <init>(...); }
+
