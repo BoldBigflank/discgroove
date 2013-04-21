@@ -98,6 +98,9 @@ public class discgroove extends Cocos2dxActivity{
                 
                 
                 //mGLSurfaceView.onSensorChanged(sensorData);
+
+                // Call down into C++ to deliver the yaw value
+                updateYaw(sensorData[2]); // you can change this to deliver the array of sensor values pretty easily
             }
         }
     };
@@ -293,4 +296,12 @@ public class discgroove extends Cocos2dxActivity{
              SetDataStreamingCommand.sendCommand(mRobot, divisor, packet_frames, mask, response_count);
          }
      }
+
+    /**
+     * Updates the yaw value at the native level. This is the stub that tells Java there is a method implemented
+     * in JNI that should receive this call. You can find this call declared in com_bold_it_discgroove_discgroove.h
+     * and implemented in Discgroove_bridge.cpp.
+     * @param yaw the current value of the ball's yaw.
+     */
+    private native void updateYaw(float yaw);
 }
