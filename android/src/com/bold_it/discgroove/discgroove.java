@@ -23,24 +23,23 @@ THE SOFTWARE.
 ****************************************************************************/
 package com.bold_it.discgroove;
 
-import org.cocos2dx.lib.Cocos2dxActivity;
-import org.cocos2dx.lib.Cocos2dxEditText;
-import org.cocos2dx.lib.Cocos2dxGLSurfaceView;
-import org.cocos2dx.lib.Cocos2dxRenderer;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
-import android.widget.FrameLayout;
 import android.view.View;
 import android.view.ViewGroup;
-import android.os.Handler;
+import android.widget.FrameLayout;
 import orbotix.robot.base.*;
 import orbotix.robot.sensor.DeviceSensorsData;
 import orbotix.view.connection.SpheroConnectionView;
 import orbotix.view.connection.SpheroConnectionView.OnRobotConnectionEventListener;
+import org.cocos2dx.lib.Cocos2dxActivity;
+import org.cocos2dx.lib.Cocos2dxEditText;
+import org.cocos2dx.lib.Cocos2dxGLSurfaceView;
+import org.cocos2dx.lib.Cocos2dxRenderer;
 
 
 public class discgroove extends Cocos2dxActivity{
@@ -99,6 +98,9 @@ public class discgroove extends Cocos2dxActivity{
                 
                 
                 //mGLSurfaceView.onSensorChanged(sensorData);
+
+                // Call down into C++ to deliver the yaw value
+                updateYaw(sensorData[2]); // you can change this to deliver the array of sensor values pretty easily
             }
         }
     };
@@ -133,7 +135,8 @@ public class discgroove extends Cocos2dxActivity{
             							   ViewGroup.LayoutParams.FILL_PARENT);
             SpheroConnectionView sphero_connection_view = new SpheroConnectionView(this);
             sphero_connection_view.setLayoutParams(sphero_connection_view_params);
-            framelayout.addView(sphero_connection_view);
+            sphero_connection_view.setBackgroundColor(0xAA000000);
+            //framelayout.addView(sphero_connection_view);
             
             // Cocos2dxGLSurfaceView
 	        mGLView = new Cocos2dxGLSurfaceView(this);
@@ -186,6 +189,7 @@ public class discgroove extends Cocos2dxActivity{
 			        }, 1000);
 			    }
 			});
+            framelayout.addView(mSpheroConnectionView);
 		}
 		else {
 			Log.d("activity", "don't support gles2.0");
@@ -238,6 +242,7 @@ public class discgroove extends Cocos2dxActivity{
 			        }, 1000);
 			    }
 			});
+         mSpheroConnectionView.setVisibility(View.VISIBLE);
 	 }
 	 
 	 @Override
@@ -264,7 +269,7 @@ public class discgroove extends Cocos2dxActivity{
          System.loadLibrary("game");
      }
 
-     private void requestDataStreaming() {
+    private void requestDataStreaming() {
 
          if(mRobot != null){
 
@@ -291,4 +296,12 @@ public class discgroove extends Cocos2dxActivity{
              SetDataStreamingCommand.sendCommand(mRobot, divisor, packet_frames, mask, response_count);
          }
      }
+
+    /**
+     * Updates the yaw value at the native level. This is the stub that tells Java there is a method implemented
+     * in JNI that should receive this call. You can find this call declared in com_bold_it_discgroove_discgroove.h
+     * and implemented in Discgroove_bridge.cpp.
+     * @param yaw the current value of the ball's yaw.
+     */
+    private native void updateYaw(float yaw);
 }
