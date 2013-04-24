@@ -20,3 +20,9 @@ local.properties
 # Eclipse project files
 .classpath
 .project
+
+android/libs/armeabi/gdb.setup
+
+android/libs/armeabi/gdbserver
+
+android/libs/armeabi/libgame.so
