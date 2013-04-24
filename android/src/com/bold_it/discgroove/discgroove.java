@@ -29,7 +29,6 @@ import android.content.pm.ConfigurationInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import orbotix.robot.base.*;
@@ -60,6 +59,8 @@ public class discgroove extends Cocos2dxActivity{
     private final static int TOTAL_PACKET_COUNT = 200;
     private final static int PACKET_COUNT_THRESHOLD = 50;
     private int mPacketCounter;
+
+    private FrameLayout mFrameLayout;
     
     private final DeviceMessenger.AsyncDataListener mDataListener = new DeviceMessenger.AsyncDataListener() {
         @Override
@@ -118,8 +119,8 @@ public class discgroove extends Cocos2dxActivity{
             ViewGroup.LayoutParams framelayout_params =
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
                                            ViewGroup.LayoutParams.FILL_PARENT);
-            FrameLayout framelayout = new FrameLayout(this);
-            framelayout.setLayoutParams(framelayout_params);
+            mFrameLayout = new FrameLayout(this);
+            mFrameLayout.setLayoutParams(framelayout_params);
 
             // Cocos2dxEditText layout
             ViewGroup.LayoutParams edittext_layout_params =
@@ -129,81 +130,21 @@ public class discgroove extends Cocos2dxActivity{
             edittext.setLayoutParams(edittext_layout_params);
 
             // ...add to FrameLayout
-            framelayout.addView(edittext);
+            mFrameLayout.addView(edittext);
 
-            ViewGroup.LayoutParams sphero_connection_view_params = 
-            	new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
-            							   ViewGroup.LayoutParams.FILL_PARENT);
-            SpheroConnectionView sphero_connection_view = new SpheroConnectionView(this);
-            sphero_connection_view.setLayoutParams(sphero_connection_view_params);
-            sphero_connection_view.setBackgroundColor(0xAA000000);
-            //framelayout.addView(sphero_connection_view);
-            
+
             // Cocos2dxGLSurfaceView
 	        mGLView = new Cocos2dxGLSurfaceView(this);
 
             // ...add to FrameLayout
-            framelayout.addView(mGLView);
+            mFrameLayout.addView(mGLView);
 
 	        mGLView.setEGLContextClientVersion(2);
 	        mGLView.setCocos2dxRenderer(new Cocos2dxRenderer());
             mGLView.setTextField(edittext);
 
             // Set framelayout as the content view
-			setContentView(framelayout);
-
-
-			// SET UP THE SPHERO
-			mSpheroConnectionView = sphero_connection_view;
-
-			// Set the connection event listener 
-			mSpheroConnectionView.setOnRobotConnectionEventListener(new OnRobotConnectionEventListener() {
-				// If bluetooth is not enabled
-				@Override
-				public void onBluetoothNotEnabled() {
-					Log.d("activity", "onBluetoothNotEnabled");
-					mSpheroConnectionView.setVisibility(View.GONE);
-				}
-			    // If the user clicked a Sphero and it failed to connect, this event will be fired
-			    @Override
-			    public void onRobotConnectionFailed(Robot robot) {
-			    	Log.d("activity", "onRobotConnectionFailed");
-			    	mSpheroConnectionView.setVisibility(View.GONE);
-			    }
-			    // If there are no Spheros paired to this device, this event will be fired
-			    @Override
-			    public void onNonePaired() {
-			    	Log.d("activity", "onNonePaired");
-			    	mSpheroConnectionView.setVisibility(View.GONE);
-			    }
-			    // The user clicked a Sphero and it successfully paired.
-			    @Override
-			    public void onRobotConnected(Robot robot) {
-			    	Log.d("activity", "onRobotConnected");
-			        // Set the robot
-			        mRobot = robot;
-			        // Hide the connection view. Comment this code if you want to connect to multiple robots
-			        mSpheroConnectionView.setVisibility(View.GONE);
-			        //mGLSurfaceView.setVisibility(View.VISIBLE);
-
-			        // Calling Stream Data Command right after the robot connects, will not work
-			        // You need to wait a second for the robot to initialize
-			        mHandler.postDelayed(new Runnable() {
-			            @Override
-			            public void run() {
-			                // turn rear light on
-			                FrontLEDOutputCommand.sendCommand(mRobot, 1.0f);
-			                // turn stabilization off
-			                StabilizationCommand.sendCommand(mRobot, false);
-			                // register the async data listener
-			                DeviceMessenger.getInstance().addAsyncDataListener(mRobot, mDataListener);
-			                // Start streaming data
-			                requestDataStreaming();
-			            }
-			        }, 1000);
-			    }
-			});
-            framelayout.addView(mSpheroConnectionView);
+			setContentView(mFrameLayout);
 		}
 		else {
 			Log.d("activity", "don't support gles2.0");
@@ -223,62 +164,79 @@ public class discgroove extends Cocos2dxActivity{
 		 Log.d("activity", "onResume");
 	     super.onResume();
 	     mGLView.onResume();
-	     //mSpheroConnectionView.setVisibility(View.VISIBLE);
-	     mSpheroConnectionView.setOnRobotConnectionEventListener(new OnRobotConnectionEventListener() {
-	    	// If bluetooth is not enabled
-			@Override
-			public void onBluetoothNotEnabled() {
-				Log.d("activity", "onBluetoothNotEnabled");
-				mSpheroConnectionView.setVisibility(View.GONE);
-			}
-		    // If the user clicked a Sphero and it failed to connect, this event will be fired
-		    @Override
-		    public void onRobotConnectionFailed(Robot robot) {
-		    	Log.d("activity", "onRobotConnectionFailed");
-		    	mSpheroConnectionView.setVisibility(View.GONE);
-		    }
-		    // If there are no Spheros paired to this device, this event will be fired
-		    @Override
-		    public void onNonePaired() {
-		    	Log.d("activity", "onNonePaired");
-		    	mSpheroConnectionView.setVisibility(View.GONE);
-		    }
-		    // The user clicked a Sphero and it successfully paired.
-		    @Override
-		    public void onRobotConnected(Robot robot) {
-		    	Log.d("activity", "onRobotConnected");
-		        // Set the robot
-		        mRobot = robot;
-		        // Hide the connection view. Comment this code if you want to connect to multiple robots
-		        mSpheroConnectionView.setVisibility(View.GONE);
-		        //mGLSurfaceView.setVisibility(View.VISIBLE);
 
-		        // Calling Stream Data Command right after the robot connects, will not work
-		        // You need to wait a second for the robot to initialize
-		        mHandler.postDelayed(new Runnable() {
-		            @Override
-		            public void run() {
-		                // turn rear light on
-		                FrontLEDOutputCommand.sendCommand(mRobot, 1.0f);
-		                // turn stabilization off
-		                StabilizationCommand.sendCommand(mRobot, false);
-		                // register the async data listener
-		                DeviceMessenger.getInstance().addAsyncDataListener(mRobot, mDataListener);
-		                // Start streaming data
-		                requestDataStreaming();
-		            }
-		        }, 1000);
-		    }
-		});
+         ViewGroup.LayoutParams sphero_connection_view_params =
+                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
+                         ViewGroup.LayoutParams.FILL_PARENT);
+         mSpheroConnectionView = new SpheroConnectionView(this);
+         mSpheroConnectionView.setOneAtATimeMode(true);
+         mSpheroConnectionView.setSingleSpheroMode(true);
+         mSpheroConnectionView.setLayoutParams(sphero_connection_view_params);
+         mSpheroConnectionView.setBackgroundColor(0xAA000000);
+
+         //mSpheroConnectionView.setVisibility(View.VISIBLE);
+	     mSpheroConnectionView.setOnRobotConnectionEventListener(new OnRobotConnectionEventListener() {
+             // If bluetooth is not enabled
+             @Override
+             public void onBluetoothNotEnabled() {
+                 Log.d("activity", "onBluetoothNotEnabled");
+                 removeConnectionView();
+             }
+
+             // If the user clicked a Sphero and it failed to connect, this event will be fired
+             @Override
+             public void onRobotConnectionFailed(Robot robot) {
+                 Log.d("activity", "onRobotConnectionFailed");
+                 removeConnectionView();
+             }
+
+             // If there are no Spheros paired to this device, this event will be fired
+             @Override
+             public void onNonePaired() {
+                 Log.d("activity", "onNonePaired");
+                 removeConnectionView();
+             }
+
+             // The user clicked a Sphero and it successfully paired.
+             @Override
+             public void onRobotConnected(Robot robot) {
+                 Log.d("activity", "onRobotConnected");
+                 // Set the robot
+                 mRobot = robot;
+
+                 // Calling Stream Data Command right after the robot connects, will not work
+                 // You need to wait a second for the robot to initialize
+                 mHandler.postDelayed(new Runnable() {
+                     @Override
+                     public void run() {
+                         // turn rear light on
+                         FrontLEDOutputCommand.sendCommand(mRobot, 1.0f);
+                         // turn stabilization off
+                         StabilizationCommand.sendCommand(mRobot, false);
+                         // register the async data listener
+                         DeviceMessenger.getInstance().addAsyncDataListener(mRobot, mDataListener);
+                         // Start streaming data
+                         requestDataStreaming();
+                     }
+                 }, 1000);
+
+                 removeConnectionView();
+             }
+         });
+
+         mFrameLayout.addView(mSpheroConnectionView);
+         mSpheroConnectionView.showSpheros();
 	 }
+
+    private void removeConnectionView() {
+        mFrameLayout.removeView(mSpheroConnectionView);
+        mSpheroConnectionView = null;
+    }
 	 
 	 @Override
 	 protected void onStop() {
 	     super.onStop();
 	     Log.d("activity", "onStop");
-			
-	     // Shutdown Sphero connection view
-	     mSpheroConnectionView.shutdown();
 
 	     // Disconnect from the robot.
 	     RobotProvider.getDefaultProvider().removeAllControls();
