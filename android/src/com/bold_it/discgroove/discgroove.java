@@ -158,6 +158,12 @@ public class discgroove extends Cocos2dxActivity{
 
 			// Set the connection event listener 
 			mSpheroConnectionView.setOnRobotConnectionEventListener(new OnRobotConnectionEventListener() {
+				// If bluetooth is not enabled
+				@Override
+				public void onBluetoothNotEnabled() {
+					Log.d("activity", "onBluetoothNotEnabled");
+					mSpheroConnectionView.setVisibility(View.GONE);
+				}
 			    // If the user clicked a Sphero and it failed to connect, this event will be fired
 			    @Override
 			    public void onRobotConnectionFailed(Robot robot) {
@@ -218,7 +224,13 @@ public class discgroove extends Cocos2dxActivity{
 	     super.onResume();
 	     mGLView.onResume();
 	     //mSpheroConnectionView.setVisibility(View.VISIBLE);
-		mSpheroConnectionView.setOnRobotConnectionEventListener(new OnRobotConnectionEventListener() {
+	     mSpheroConnectionView.setOnRobotConnectionEventListener(new OnRobotConnectionEventListener() {
+	    	// If bluetooth is not enabled
+			@Override
+			public void onBluetoothNotEnabled() {
+				Log.d("activity", "onBluetoothNotEnabled");
+				mSpheroConnectionView.setVisibility(View.GONE);
+			}
 		    // If the user clicked a Sphero and it failed to connect, this event will be fired
 		    @Override
 		    public void onRobotConnectionFailed(Robot robot) {
